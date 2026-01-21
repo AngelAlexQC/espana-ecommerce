@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/ui/Header.astro';
+import CheckoutForm from '../../components/react/CheckoutForm';
+---
+
+<Layout title="Finalizar Compra | España.ec">
+    <Header />
+    
+    <main class="max-w-7xl mx-auto px-4 py-12">
+        <h1 class="text-4xl font-display font-bold text-center mb-12">Finalizar Compra</h1>
+        
+        <CheckoutForm client:only="react" />
+    </main>
+</Layout>

@@ -1,0 +1,80 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+import '@fontsource/inter';
+import '@fontsource/syne';
+import '@fontsource/space-grotesk';
+
+interface Props {
+	title: string;
+    description?: string;
+}
+
+const { title, description = "La tienda más moderna del Ecuador. Encuentra lo último en tecnología, hogar y más." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es" class="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+        <ClientRouter />
+        <script>
+            import Lenis from 'lenis';
+
+            // Initialize Lenis for smooth scrolling
+            const lenis = new Lenis({
+                lerp: 0.05, // Smoothness intensity
+                wheelMultiplier: 1.2, // Scroll speed
+            });
+
+            function raf(time: number) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+
+            requestAnimationFrame(raf);
+
+            // Re-init on navigation for view transitions
+            document.addEventListener('astro:page-load', () => {
+                // Ensure scroll position reset or persistence if needed
+            });
+        </script>
+	</head>
+	<body class="bg-dark-bg text-white selection:bg-brand-500 selection:text-white antialiased">
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+    /* View Transitions Customizations */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation-duration: 0.4s;
+    }
+
+    /* Improve Lenis integration */
+    html.lenis, html.lenis body {
+      height: auto;
+    }
+    
+    .lenis.lenis-smooth {
+      scroll-behavior: auto !important;
+    }
+    
+    .lenis.lenis-smooth [data-lenis-prevent] {
+      overscroll-behavior: contain;
+    }
+    
+    .lenis.lenis-stopped {
+      overflow: hidden;
+    }
+    
+    .lenis.lenis-smooth iframe {
+      pointer-events: none;
+    }
+</style>

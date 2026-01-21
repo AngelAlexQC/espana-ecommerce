@@ -1,0 +1,40 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/ui/Header.astro';
+import CartDrawer from '../components/react/CartDrawer';
+import ProductBrowser from '../components/react/ProductBrowser';
+import catalog from '../../catalog.json';
+
+// Get unique categories and sort
+const categories = [...new Set(catalog.flatMap(p => p.categories))].filter(Boolean).sort();
+---
+
+<Layout title="Tienda | España.ec">
+    <Header />
+    <CartDrawer client:load />
+
+    <main class="max-w-[1600px] mx-auto px-4 py-8">
+        <ProductBrowser 
+            client:load 
+            products={catalog} 
+            categories={categories} 
+        />
+    </main>
+</Layout>
+
+<style>
+    /* Custom Scrollbar for Filters */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.1);
+        border-radius: 2px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.2);
+    }
+</style>

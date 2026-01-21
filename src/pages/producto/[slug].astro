@@ -1,0 +1,140 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/ui/Header.astro';
+import CartDrawer from '../../components/react/CartDrawer';
+import ProductGallery from '../../components/react/ProductGallery';
+import ProductCard from '../../components/react/ProductCard';
+import { ShoppingCart, Truck, ShieldCheck, CreditCard } from 'lucide-react';
+import catalog from '../../../catalog.json';
+import { formatCurrency, parsePrice } from '../../utils/currency';
+
+export async function getStaticPaths() {
+    return catalog
+        .map((product, index) => {
+            let id = product.sku && typeof product.sku === 'string' && product.sku.trim().length > 0 
+                ? product.sku 
+                : `product-${index}`;
+            
+            return {
+                params: { slug: String(id).replace(/\//g, '-') }, // Replace slashes to avoid route issues
+                props: { product }
+            };
+        });
+}
+
+const { product } = Astro.props;
+if (!product) {
+    return Astro.redirect('/404');
+}
+
+const numericPrice = parsePrice(product.price || "0");
+const relatedProducts = catalog
+    .filter(p => p.categories.some(c => product.categories.includes(c)) && p.sku !== product.sku)
+    .slice(0, 4);
+---
+
+<Layout title={`${product.title} | España.ec`}>
+    <Header />
+    <CartDrawer client:load />
+
+    <main class="py-12 max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
+            
+            {/* Product Image Gallery */}
+            <div class="space-y-4">
+                <ProductGallery 
+                    client:load 
+                    images={product.images && product.images.length > 0 ? product.images : [product.image_url]} 
+                    title={product.title} 
+                    sku={product.sku}
+                />
+            </div>
+
+            {/* Product Info */}
+            <div class="flex flex-col justify-center">
+                <div class="mb-6">
+                    <h1 
+                        class="font-display text-3xl md:text-5xl font-bold leading-tight mb-4 text-balance"
+                        style={`view-transition-name: title-${product.sku}`}
+                    >
+                        {product.title}
+                    </h1>
+                    <div class="flex items-center gap-4">
+                        <span 
+                            class="text-3xl font-mono text-brand-400 font-bold"
+                            style={`view-transition-name: price-${product.sku}`}
+                        >
+                            {formatCurrency(numericPrice)}
+                        </span>
+                        {product.sku && (
+                            <span class="px-2 py-1 bg-white/5 rounded text-xs font-mono text-white/40">
+                                SKU: {product.sku}
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                <div class="prose prose-invert prose-lg text-white/70 mb-10 max-w-none">
+                    <p>{product.description || "Este producto cuenta con la calidad garantizada de Almacenes España. Tecnología de punta para tu hogar."}</p>
+                </div>
+
+                {/* Actions */}
+                <div class="flex flex-col sm:flex-row gap-4 mb-12">
+                    <button 
+                        class="flex-1 bg-brand-600 hover:bg-brand-500 text-white px-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all hover:scale-[1.02] shadow-lg shadow-brand-900/50"
+                        onclick={`window.addToCart({id: '${product.sku}', title: '${product.title.replace(/'/g, "\'")}', price: ${numericPrice}, image: '${product.image_url}'})`}
+                    >
+                        <ShoppingCart className="w-5 h-5" />
+                        Añadir al Carrito
+                    </button>
+                    <button class="px-6 py-4 border border-white/10 rounded-xl hover:bg-white/5 transition-colors font-medium">
+                        Comprar ahora
+                    </button>
+                </div>
+
+                {/* Features Grid */}
+                <div class="grid grid-cols-3 gap-4 border-t border-white/10 pt-8">
+                    <div class="text-center p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10">
+                        <div class="w-10 h-10 mx-auto bg-white/10 rounded-full flex items-center justify-center mb-2 text-brand-400">
+                            <Truck className="w-5 h-5" />
+                        </div>
+                        <p class="text-xs font-medium text-white/60">Envío Gratis</p>
+                    </div>
+                    <div class="text-center p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10">
+                        <div class="w-10 h-10 mx-auto bg-white/10 rounded-full flex items-center justify-center mb-2 text-brand-400">
+                            <ShieldCheck className="w-5 h-5" />
+                        </div>
+                        <p class="text-xs font-medium text-white/60">Garantía 1 Año</p>
+                    </div>
+                    <div class="text-center p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10">
+                        <div class="w-10 h-10 mx-auto bg-white/10 rounded-full flex items-center justify-center mb-2 text-brand-400">
+                            <CreditCard className="w-5 h-5" />
+                        </div>
+                        <p class="text-xs font-medium text-white/60">Pago Seguro</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+            <div class="mt-24">
+                <h2 class="font-display text-2xl font-bold mb-8">También te podría interesar</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {relatedProducts.map((p, index) => (
+                         <ProductCard 
+                            client:visible 
+                            product={p} 
+                            index={index} 
+                         />
+                    ))}
+                </div>
+            </div>
+        )}
+    </main>
+    
+    <script>
+        import { addToCart } from '../../store/cart';
+        (window as any).addToCart = addToCart;
+    </script>
+</Layout>

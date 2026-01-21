@@ -1,0 +1,116 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/ui/Hero.astro';
+import Header from '../components/ui/Header.astro';
+import ProductCard from '../components/react/ProductCard';
+import CartDrawer from '../components/react/CartDrawer';
+import { ArrowRight } from 'lucide-react';
+
+// Load Data
+import catalog from '../../catalog.json';
+
+// Get featured products (e.g., first 8 items with images)
+const featuredProducts = catalog
+    .filter(p => p.image_url && !p.image_url.includes('placeholder'))
+    .slice(0, 8);
+
+// Get Categories (Simple extraction)
+const categories = [...new Set(catalog.map(p => p.categories[0]))].slice(0, 6);
+---
+
+<Layout title="España.ec | Tienda Oficial">
+    <Header />
+    <CartDrawer client:load />
+    
+    <main>
+        <Hero />
+        
+        {/* Categories Marquee / Grid */}
+        <section class="py-20 border-b border-white/5">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-10">
+                    <h2 class="font-display text-3xl font-bold">Categorías Populares</h2>
+                    <a href="/categorias" class="flex items-center gap-2 text-brand-400 hover:text-white transition-colors text-sm font-medium">
+                        Ver todas <ArrowRight className="w-4 h-4" />
+                    </a>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    {categories.map((cat, i) => (
+                        <a href={`/categoria/${cat?.toLowerCase()}`} class="group relative aspect-square bg-white/5 rounded-2xl flex items-center justify-center p-4 border border-white/5 hover:border-brand-500/50 hover:bg-white/10 transition-all overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-brand-500/0 to-brand-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <span class="relative z-10 text-center font-medium text-sm md:text-base group-hover:scale-110 transition-transform duration-300">
+                                {cat}
+                            </span>
+                        </a>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/* Featured Products */}
+        <section class="py-24 bg-dark-bg relative">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-end justify-between mb-12 gap-4">
+                    <div>
+                        <span class="text-brand-400 font-mono text-sm tracking-wider uppercase">Selección del Editor</span>
+                        <h2 class="font-display text-4xl md:text-5xl font-bold mt-2">Tendencias de la Semana</h2>
+                    </div>
+                    <div class="h-px flex-1 bg-white/10 mx-8 hidden md:block"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {featuredProducts.map((product, index) => {
+                        // Extract ID from URL for routing (simple hash)
+                        const id = product.sku || Math.random().toString(36).substring(2, 11);
+                        
+                        return (
+                            <ProductCard 
+                                client:visible
+                                index={index}
+                                product={{
+                                    sku: id,
+                                    title: product.title,
+                                    price: product.price || "$0.00",
+                                    image_url: product.image_url || "",
+                                    categories: product.categories
+                                }}
+                            />
+                        );
+                    })}
+                </div>
+                
+                <div class="mt-16 text-center">
+                    <a href="/tienda" class="inline-flex items-center gap-2 px-8 py-4 border border-white/20 rounded-full hover:bg-white hover:text-black transition-all font-medium group">
+                        Ver todo el catálogo
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        {/* Value Props */}
+        <section class="py-24 border-t border-white/5">
+            <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-8 bg-white/5 rounded-2xl border border-white/5">
+                    <h3 class="font-display text-xl font-bold mb-2 text-brand-400">Envío Nacional Seguro</h3>
+                    <p class="text-white/60">Llegamos a cada rincón del Ecuador con partners logísticos certificados.</p>
+                </div>
+                <div class="p-8 bg-white/5 rounded-2xl border border-white/5">
+                    <h3 class="font-display text-xl font-bold mb-2 text-brand-400">Garantía Directa</h3>
+                    <p class="text-white/60">Todos nuestros productos cuentan con garantía oficial de fábrica.</p>
+                </div>
+                <div class="p-8 bg-white/5 rounded-2xl border border-white/5">
+                    <h3 class="font-display text-xl font-bold mb-2 text-brand-400">Pagos Flexibles</h3>
+                    <p class="text-white/60">Aceptamos todas las tarjetas de crédito y transferencias directas.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-black py-12 border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-4 text-center text-white/40 text-sm">
+            <p>&copy; {new Date().getFullYear()} Almacenes España. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+</Layout>

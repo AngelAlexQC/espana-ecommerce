@@ -1,0 +1,39 @@
+---
+import HeaderActions from '../react/HeaderActions';
+
+const navItems = [
+    { name: 'Inicio', href: '/' },
+    { name: 'Tienda', href: '/tienda' },
+    { name: 'Categorías', href: '/categorias' },
+    { name: 'Ofertas', href: '/ofertas' },
+];
+---
+
+<header class="fixed top-0 left-0 w-full z-40 bg-dark-bg/60 backdrop-blur-xl border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        {/* Logo */}
+        <a href="/" class="flex items-center gap-2 group">
+            <div class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white font-display font-bold text-xl group-hover:rotate-12 transition-transform">
+                E
+            </div>
+            <span class="font-display font-bold text-xl tracking-tight">ESPAÑA<span class="text-brand-400">.ec</span></span>
+        </a>
+
+        {/* Desktop Nav */}
+        <nav class="hidden md:flex items-center gap-8">
+            {navItems.map(item => (
+                <a 
+                    href={item.href} 
+                    class="text-sm font-medium text-white/70 hover:text-white transition-colors relative group"
+                >
+                    {item.name}
+                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-400 group-hover:w-full transition-all duration-300"></span>
+                </a>
+            ))}
+        </nav>
+
+        {/* Actions */}
+        <HeaderActions client:load />
+    </div>
+</header>
+<div class="h-16"></div> {/* Spacer */}
